@@ -1,4 +1,5 @@
-package PACKAGE_NAME;
-
-public class SiriException {
+public class SiriException extends Exception{
+    public SiriException(String message) {
+            super(message);
+    }
 }
