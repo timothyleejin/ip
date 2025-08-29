@@ -9,19 +9,18 @@ import siri.tasktypes.ToDo;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List; //new
+import java.util.List;
 import java.util.Scanner;
 
 public class Siri {
-    //private static ArrayList<Task> tasks = new ArrayList<>();
-    private static final String FILE_PATH = "./data/siri.txt"; //new
-    private static List<Task> tasks; //new
-    private static Storage storage; //new
+    private static final String FILE_PATH = "./data/siri.txt";
+    private static List<Task> tasks;
+    private static Storage storage;
 
     public static void main(String[] args) {
-        storage = new Storage(FILE_PATH); //new
+        storage = new Storage(FILE_PATH);
         try {
-            tasks = storage.load(); // new code - load tasks from disk
+            tasks = storage.load(); //load tasks from disk
         } catch (Exception e) {
             tasks = new ArrayList<>();
         }
@@ -34,7 +33,7 @@ public class Siri {
             String command = scanner.nextLine();
             try {
                 executeCommand(command);
-                storage.save(tasks); //new
+                storage.save(tasks);
             } catch (SiriException | IOException e) {
                 System.out.println("____________________________________________________________");
                 System.out.println(" " + e.getMessage());
@@ -84,13 +83,22 @@ public class Siri {
                 addTask(task);
             } else if (command.startsWith("deadline")) {
                 String[] words = command.split("/by", 2);
+                if (words.length < 2) {
+                    throw new SiriException(
+                            "Please specify the deadline using /by. Example: deadline return book /by 2025-12-29 1800"
+                    );
+                }
                 String description = words[0].substring(8).trim();
                 if (description.isEmpty()) {
                     throw new SiriException("What is your deadline task?");
                 }
                 String by = words[1].trim();
-                Task task = new Deadline(description, by);
-                addTask(task);
+                try {
+                    Task task = new Deadline(description, by);
+                    addTask(task);
+                } catch (java.time.format.DateTimeParseException e) {
+                    throw new SiriException("Invalid date/time format. Please use yyyy-MM-dd HHmm, e.g., 2025-12-29 1800");
+                }
             } else if (command.startsWith("delete")) {
                 System.out.println("____________________________________________________________");
                 int index = Integer.parseInt(command.split(" ")[1]) - 1;
