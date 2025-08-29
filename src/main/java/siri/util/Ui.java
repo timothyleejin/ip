@@ -11,7 +11,7 @@ public class Ui {
 
     public void sayGoodbye() {
         System.out.println("____________________________________________________________");
-        System.out.println("Bye. Hope to see you again soon!");
+        System.out.println("Bye bye :( Hope to see you again soon!");
         System.out.println("____________________________________________________________");
     }
 

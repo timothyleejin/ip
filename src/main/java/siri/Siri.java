@@ -1,6 +1,8 @@
 package siri;
 
 import siri.exceptions.SiriException;
+import siri.exceptions.TaskNotFoundException;
+import siri.exceptions.InvalidCommandException;
 import siri.storage.Storage;
 import siri.tasktypes.Deadline;
 import siri.tasktypes.Event;
@@ -8,11 +10,8 @@ import siri.tasktypes.Task;
 import siri.tasktypes.ToDo;
 import siri.tasktypes.TaskList;
 import siri.util.Ui;
-import siri.util.Parser;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Siri {
@@ -53,21 +52,33 @@ public class Siri {
             } else if (command.equalsIgnoreCase("list")) {
                 ui.sayTaskList(tasks.getAll());
             } else if (command.startsWith("mark ")) {
-                String[] word = command.split(" ");
-                int index = Integer.parseInt(word[1]) - 1;
-                Task t = tasks.get(index);
-                t.markDone();
-                ui.sayTaskMarked(t, true);
+                try {
+                    String[] word = command.split(" ");
+                    int index = Integer.parseInt(word[1]) - 1;
+                    Task t = tasks.get(index);
+                    t.markDone();
+                    ui.sayTaskMarked(t, true);
+                } catch (IndexOutOfBoundsException e) {
+                    throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
+                } catch (NumberFormatException e) {
+                    throw new InvalidCommandException("Sorry, please key in a valid task number!");
+                }
             } else if (command.startsWith("unmark ")) {
-                String[] word = command.split(" ");
-                int index = Integer.parseInt(word[1]) - 1;
-                Task t = tasks.get(index);
-                t.markUndone();
-                ui.sayTaskMarked(t, false);
+                try {
+                    String[] word = command.split(" ");
+                    int index = Integer.parseInt(word[1]) - 1;
+                    Task t = tasks.get(index);
+                    t.markUndone();
+                    ui.sayTaskMarked(t, false);
+                } catch (IndexOutOfBoundsException e) {
+                    throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
+                } catch (NumberFormatException e) {
+                    throw new InvalidCommandException("Sorry, please key in a valid task number!");
+                }
             } else if (command.startsWith("todo")) {
                 String description = command.substring(4).trim();;
                 if (description.isEmpty()) {
-                    throw new SiriException("What is your todo task?");
+                    throw new TaskNotFoundException("What is your todo task?");
                 }
                 Task task = new ToDo(description);
                 tasks.add(task);
@@ -76,7 +87,10 @@ public class Siri {
                 String[] word = command.split("/from|/to");
                 String description = word[0].substring(5).trim();
                 if (description.isEmpty()) {
-                    throw new SiriException("What is your event task?");
+                    throw new InvalidCommandException("What is your event?");
+                }
+                if (word.length < 3) {
+                    throw new InvalidCommandException("Please specify the event duration using /from and /to.");
                 }
                 String from = word[1].trim();
                 String to = word[2].trim();
@@ -84,30 +98,37 @@ public class Siri {
                 tasks.add(task);
                 ui.sayTaskAdded(task, tasks.size());
             } else if (command.startsWith("deadline")) {
-                String[] words = command.split("/by", 2);
+                String deadlineTask = command.substring(8).trim();
+                if (deadlineTask.isEmpty()) {
+                    throw new InvalidCommandException("What is your deadline task?");
+                }
+                String[] words = deadlineTask.split("/by", 2);
                 if (words.length < 2) {
-                    throw new SiriException(
+                    throw new InvalidCommandException(
                             "Please specify the deadline using /by. Example: deadline return book /by 2025-12-29 1800"
                     );
                 }
-                String description = words[0].substring(8).trim();
-                if (description.isEmpty()) {
-                    throw new SiriException("What is your deadline task?");
-                }
+                String description = words[0].trim();
                 String by = words[1].trim();
                 try {
                     Task task = new Deadline(description, by);
                     tasks.add(task);
                     ui.sayTaskAdded(task, tasks.size());
                 } catch (java.time.format.DateTimeParseException e) {
-                    throw new SiriException("Invalid date/time format. Please use yyyy-MM-dd HHmm, e.g., 2025-12-29 1800");
+                    throw new InvalidCommandException("Please enter a valid date/time format (yyyy-MM-dd HHmm). Example: 2025-12-29 1800");
                 }
             } else if (command.startsWith("delete")) {
-                int index = Integer.parseInt(command.split(" ")[1]) - 1;
-                Task removedTask = tasks.remove(index);
-                ui.sayTaskDeleted(removedTask, tasks.size());
+                try {
+                    int index = Integer.parseInt(command.split(" ")[1]) - 1;
+                    Task removedTask = tasks.remove(index);
+                    ui.sayTaskDeleted(removedTask, tasks.size());
+                } catch (IndexOutOfBoundsException e) {
+                    throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
+                } catch (NumberFormatException e) {
+                    throw new InvalidCommandException("Sorry, please key in a valid task number!");
+                }
             } else {
-                throw new SiriException("Sorry :((( I don't know what that means");
+                throw new InvalidCommandException("Sorry :((( I don't know what that means");
             }
     }
 
