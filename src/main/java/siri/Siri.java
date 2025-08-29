@@ -1,18 +1,31 @@
 package siri;
 
 import siri.exceptions.SiriException;
+import siri.storage.Storage;
 import siri.tasktypes.Deadline;
 import siri.tasktypes.Event;
 import siri.tasktypes.Task;
 import siri.tasktypes.ToDo;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List; //new
 import java.util.Scanner;
 
 public class Siri {
-    private static ArrayList<Task> tasks = new ArrayList<>();
+    //private static ArrayList<Task> tasks = new ArrayList<>();
+    private static final String FILE_PATH = "./data/siri.txt"; //new
+    private static List<Task> tasks; //new
+    private static Storage storage; //new
 
     public static void main(String[] args) {
+        storage = new Storage(FILE_PATH); //new
+        try {
+            tasks = storage.load(); // new code - load tasks from disk
+        } catch (Exception e) {
+            tasks = new ArrayList<>();
+        }
+
         Scanner scanner = new Scanner(System.in);
         System.out.println("Hello! I'm Siri!\n");
         System.out.println("What can I do for you?\n");
@@ -21,7 +34,8 @@ public class Siri {
             String command = scanner.nextLine();
             try {
                 executeCommand(command);
-            } catch (SiriException e) {
+                storage.save(tasks); //new
+            } catch (SiriException | IOException e) {
                 System.out.println("____________________________________________________________");
                 System.out.println(" " + e.getMessage());
                 System.out.println("____________________________________________________________");

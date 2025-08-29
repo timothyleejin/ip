@@ -1,6 +1,6 @@
 package siri.tasktypes;
 
-public class Task {
+public abstract class Task {
     protected String description;
     protected boolean isDone;
 
@@ -19,6 +19,38 @@ public class Task {
 
     public void markUndone() {
         isDone = false;
+    }
+
+    public abstract String toFileString();
+
+    public static Task fromFileString(String line) { //new
+        String[] parts = line.split(" \\| ");
+        String type = parts[0];
+        boolean isDone = parts[1].equals("1");
+        String description = parts[2];
+
+        switch (type) {
+            case "T":
+                Task t = new ToDo(description);
+                if (isDone) {
+                    t.markDone();
+                }
+                return t;
+            case "D":
+                Task d = new Deadline(description, parts[3]);
+                if (isDone) {
+                    d.markDone();
+                }
+                return d;
+            case "E":
+                Task e = new Event(description, parts[3], parts[4]);
+                if (isDone) {
+                    e.markDone();
+                }
+                return e;
+            default:
+                return null;
+        }
     }
 
     @Override
