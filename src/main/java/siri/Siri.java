@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Siri {
-    //private static ArrayList<Task> tasks = new ArrayList<>();
     private static final String FILE_PATH = "./data/siri.txt";
     private static List<Task> tasks;
     private static Storage storage;
@@ -84,13 +83,22 @@ public class Siri {
                 addTask(task);
             } else if (command.startsWith("deadline")) {
                 String[] words = command.split("/by", 2);
+                if (words.length < 2) {
+                    throw new SiriException(
+                            "Please specify the deadline using /by. Example: deadline return book /by 2025-12-29 1800"
+                    );
+                }
                 String description = words[0].substring(8).trim();
                 if (description.isEmpty()) {
                     throw new SiriException("What is your deadline task?");
                 }
                 String by = words[1].trim();
-                Task task = new Deadline(description, by);
-                addTask(task);
+                try {
+                    Task task = new Deadline(description, by);
+                    addTask(task);
+                } catch (java.time.format.DateTimeParseException e) {
+                    throw new SiriException("Invalid date/time format. Please use yyyy-MM-dd HHmm, e.g., 2025-12-29 1800");
+                }
             } else if (command.startsWith("delete")) {
                 System.out.println("____________________________________________________________");
                 int index = Integer.parseInt(command.split(" ")[1]) - 1;
