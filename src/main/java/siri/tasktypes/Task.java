@@ -23,7 +23,7 @@ public abstract class Task {
 
     public abstract String toFileString();
 
-    public static Task fromFileString(String line) { //new
+    public static Task fromFileString(String line) {
         String[] parts = line.split(" \\| ");
         String type = parts[0];
         boolean isDone = parts[1].equals("1");

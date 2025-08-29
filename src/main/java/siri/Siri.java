@@ -9,19 +9,19 @@ import siri.tasktypes.ToDo;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List; //new
+import java.util.List;
 import java.util.Scanner;
 
 public class Siri {
     //private static ArrayList<Task> tasks = new ArrayList<>();
-    private static final String FILE_PATH = "./data/siri.txt"; //new
-    private static List<Task> tasks; //new
-    private static Storage storage; //new
+    private static final String FILE_PATH = "./data/siri.txt";
+    private static List<Task> tasks;
+    private static Storage storage;
 
     public static void main(String[] args) {
-        storage = new Storage(FILE_PATH); //new
+        storage = new Storage(FILE_PATH);
         try {
-            tasks = storage.load(); // new code - load tasks from disk
+            tasks = storage.load(); //load tasks from disk
         } catch (Exception e) {
             tasks = new ArrayList<>();
         }
@@ -34,7 +34,7 @@ public class Siri {
             String command = scanner.nextLine();
             try {
                 executeCommand(command);
-                storage.save(tasks); //new
+                storage.save(tasks);
             } catch (SiriException | IOException e) {
                 System.out.println("____________________________________________________________");
                 System.out.println(" " + e.getMessage());
