@@ -6,7 +6,6 @@ public class Siri {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
         System.out.println("Hello! I'm Siri!\n");
         System.out.println("What can I do for you?\n");
 
