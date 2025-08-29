@@ -1,130 +1,185 @@
 package siri;
 
 import siri.exceptions.SiriException;
+import siri.exceptions.TaskNotFoundException;
+import siri.exceptions.InvalidCommandException;
 import siri.storage.Storage;
 import siri.tasktypes.Deadline;
 import siri.tasktypes.Event;
 import siri.tasktypes.Task;
 import siri.tasktypes.ToDo;
+import siri.tasktypes.TaskList;
+import siri.util.Ui;
+import siri.util.Parser;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Siri {
     private static final String FILE_PATH = "./data/siri.txt";
-    private static List<Task> tasks;
-    private static Storage storage;
 
-    public static void main(String[] args) {
-        storage = new Storage(FILE_PATH);
+    private TaskList tasks;
+    private Storage storage;
+    private Ui ui;
+
+    public Siri(String filePath) {
+        ui = new Ui();
+        storage = new Storage(filePath);
         try {
-            tasks = storage.load(); //load tasks from disk
+            tasks = new TaskList(storage.load());
         } catch (Exception e) {
-            tasks = new ArrayList<>();
+            tasks = new TaskList();
         }
+    }
 
+    public void run() {
+        ui.sayWelcome();
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Hello! I'm Siri!\n");
-        System.out.println("What can I do for you?\n");
 
         while (true) {
             String command = scanner.nextLine();
             try {
                 executeCommand(command);
-                storage.save(tasks);
+                storage.save(tasks.getAll());
             } catch (SiriException | IOException e) {
-                System.out.println("____________________________________________________________");
-                System.out.println(" " + e.getMessage());
-                System.out.println("____________________________________________________________");
+                ui.sayError(e.getMessage());
             }
         }
     }
 
-    private static void executeCommand(String command) throws SiriException {
-            if (command.equalsIgnoreCase("bye")) {
-                System.out.println("____________________________________________________________");
-                System.out.println("Bye. Hope to see you again soon!");
-                System.out.println("____________________________________________________________");
+    private void executeCommand(String command) throws SiriException {
+        String[] parsedCommand = Parser.parse(command);
+        String argument = parsedCommand[0].toLowerCase();
+        String userAction = parsedCommand.length > 1 ? parsedCommand[1] : "";
+
+        switch (argument) {
+            case "bye":
+                ui.sayGoodbye();
                 System.exit(0);
-            } else if (command.equalsIgnoreCase("list")) {
-                print();
-            } else if (command.startsWith("mark ")) {
-                System.out.println("____________________________________________________________");
-                String[] word = command.split(" ");
-                int index = Integer.parseInt(word[1]) - 1;
-                tasks.get(index).markDone();
-                System.out.println("Nice! I've marked this task as done:\n " + tasks.get(index));
-                System.out.println("____________________________________________________________");
-            } else if (command.startsWith("unmark ")) {
-                System.out.println("____________________________________________________________");
-                String[] word = command.split(" ");
-                int index = Integer.parseInt(word[1]) - 1;
-                tasks.get(index).markUndone();
-                System.out.println("OK, I've marked this task as not done yet:\n " + tasks.get(index));
-                System.out.println("____________________________________________________________");
-            } else if (command.startsWith("todo")) {
-                String description = command.substring(4).trim();;
-                if (description.isEmpty()) {
-                    throw new SiriException("What is your todo task?");
-                }
-                Task task = new ToDo(description);
-                addTask(task);
-            } else if (command.startsWith("event")) {
-                String[] word = command.split("/from|/to");
-                String description = word[0].substring(5).trim();
-                if (description.isEmpty()) {
-                    throw new SiriException("What is your event task?");
-                }
-                String from = word[1].trim();
-                String to = word[2].trim();
-                Task task = new Event(description, from, to);
-                addTask(task);
-            } else if (command.startsWith("deadline")) {
-                String[] words = command.split("/by", 2);
-                if (words.length < 2) {
-                    throw new SiriException(
-                            "Please specify the deadline using /by. Example: deadline return book /by 2025-12-29 1800"
-                    );
-                }
-                String description = words[0].substring(8).trim();
-                if (description.isEmpty()) {
-                    throw new SiriException("What is your deadline task?");
-                }
-                String by = words[1].trim();
-                try {
-                    Task task = new Deadline(description, by);
-                    addTask(task);
-                } catch (java.time.format.DateTimeParseException e) {
-                    throw new SiriException("Invalid date/time format. Please use yyyy-MM-dd HHmm, e.g., 2025-12-29 1800");
-                }
-            } else if (command.startsWith("delete")) {
-                System.out.println("____________________________________________________________");
-                int index = Integer.parseInt(command.split(" ")[1]) - 1;
-                Task removedTask = tasks.remove(index);
-                System.out.println("Gotcha :) I've removed this task:\n " + removedTask);
-                System.out.println("Now you have " + tasks.size() + " tasks in the list.");
-                System.out.println("____________________________________________________________");
-            } else {
-                throw new SiriException("Sorry :((( I don't know what that means");
-            }
-    }
+                break;
 
-    private static void print() {
-        System.out.println("____________________________________________________________");
-        System.out.println("Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
+            case "list":
+                ui.sayTaskList(tasks.getAll());
+                break;
+
+            case "mark":
+                performMarkAction(userAction, true);
+                break;
+
+            case "unmark":
+                performMarkAction(userAction, false);
+                break;
+
+            case "todo":
+                performTodoAction(userAction);
+                break;
+
+            case "event":
+                performEventAction(userAction);
+                break;
+
+            case "deadline":
+                performDeadlineAction(userAction);
+                break;
+
+            case "delete":
+                performDeleteAction(userAction);
+                break;
+
+            default:
+                throw new InvalidCommandException("Sorry :((( I don't know what that means");
         }
-        System.out.println("____________________________________________________________");
     }
 
-    private static void addTask(Task task) {
-        System.out.println("____________________________________________________________");
+    private void performMarkAction(String description, boolean isMark) throws SiriException {
+        if (description.isEmpty()) {
+            throw new InvalidCommandException("Hi! Please specify a task number to " + (isMark ? "mark" : "unmark"));
+        }
+        try {
+            int index = Integer.parseInt(description) - 1;
+            Task task = tasks.get(index);
+            if (isMark) {
+                task.markDone();
+            } else {
+                task.markUndone();
+            }
+            ui.sayTaskMarked(task, isMark);
+        } catch (IndexOutOfBoundsException e) {
+            throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
+        } catch (NumberFormatException e) {
+            throw new InvalidCommandException("Sorry, please key in a valid task number!");
+        }
+    }
+
+    private void performTodoAction(String description) throws SiriException {
+        if (description.isEmpty()) {
+            throw new TaskNotFoundException("What is your todo task?");
+        }
+        Task task = new ToDo(description);
         tasks.add(task);
-        System.out.println("Got it :)) I've added this task:\n " + task);
-        System.out.println("Now you have " + tasks.size() + " task(s) in the list.");
-        System.out.println("____________________________________________________________");
+        ui.sayTaskAdded(task, tasks.size());
+    }
+
+    private void performEventAction(String arguments) throws SiriException {
+        if (arguments.isEmpty()) {
+            throw new InvalidCommandException("What is your event?");
+        }
+
+        String[] parts = arguments.split("/from|/to");
+        if (parts.length < 3) {
+            throw new InvalidCommandException("Please specify the event duration using /from and /to.");
+        }
+
+        String description = parts[0].trim();
+        String from = parts[1].trim();
+        String to = parts[2].trim();
+
+        Task task = new Event(description, from, to);
+        tasks.add(task);
+        ui.sayTaskAdded(task, tasks.size());
+    }
+
+    private void performDeadlineAction(String arguments) throws SiriException {
+        if (arguments.isEmpty()) {
+            throw new InvalidCommandException("What is your deadline task?");
+        }
+
+        String[] words = arguments.split("/by", 2);
+        if (words.length < 2) {
+            throw new InvalidCommandException(
+                    "Please specify the deadline using /by. Example: deadline return book /by 2025-12-29 1800"
+            );
+        }
+
+        String description = words[0].trim();
+        String by = words[1].trim();
+
+        try {
+            Task task = new Deadline(description, by);
+            tasks.add(task);
+            ui.sayTaskAdded(task, tasks.size());
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new InvalidCommandException("Please enter a valid date/time format (yyyy-MM-dd HHmm). Example: 2025-12-29 1800");
+        }
+    }
+
+    private void performDeleteAction(String arguments) throws SiriException {
+        if (arguments.isEmpty()) {
+            throw new InvalidCommandException("Please specify a task number to delete");
+        }
+
+        try {
+            int index = Integer.parseInt(arguments) - 1;
+            Task removedTask = tasks.remove(index);
+            ui.sayTaskDeleted(removedTask, tasks.size());
+        } catch (IndexOutOfBoundsException e) {
+            throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
+        } catch (NumberFormatException e) {
+            throw new InvalidCommandException("Sorry, please key in a valid task number!");
+        }
+    }
+
+    public static void main(String[] args) {
+        new Siri(FILE_PATH).run();
     }
 }
