@@ -17,63 +17,61 @@ import java.util.Scanner;
 
 public class Siri {
     private static final String FILE_PATH = "./data/siri.txt";
-    private static List<Task> tasks;
-    private static Storage storage;
 
-    public static void main(String[] args) {
-        storage = new Storage(FILE_PATH);
+    private TaskList tasks;
+    private Storage storage;
+    private Ui ui;
+
+    public Siri(String filePath) {
+        ui = new Ui();
+        storage = new Storage(filePath);
         try {
-            tasks = storage.load(); //load tasks from disk
+            tasks = new TaskList(storage.load());
         } catch (Exception e) {
-            tasks = new ArrayList<>();
+            tasks = new TaskList();
         }
-
+    }
+    public void run() {
+        ui.sayWelcome();
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Hello! I'm Siri!\n");
-        System.out.println("What can I do for you?\n");
 
         while (true) {
             String command = scanner.nextLine();
             try {
                 executeCommand(command);
-                storage.save(tasks);
+                storage.save(tasks.getAll());
             } catch (SiriException | IOException e) {
-                System.out.println("____________________________________________________________");
-                System.out.println(" " + e.getMessage());
-                System.out.println("____________________________________________________________");
+                ui.sayError(e.getMessage());
             }
         }
     }
 
-    private static void executeCommand(String command) throws SiriException {
+    private void executeCommand(String command) throws SiriException {
             if (command.equalsIgnoreCase("bye")) {
-                System.out.println("____________________________________________________________");
-                System.out.println("Bye. Hope to see you again soon!");
-                System.out.println("____________________________________________________________");
+                ui.sayGoodbye();
                 System.exit(0);
             } else if (command.equalsIgnoreCase("list")) {
-                print();
+                ui.sayTaskList(tasks.getAll());
             } else if (command.startsWith("mark ")) {
-                System.out.println("____________________________________________________________");
                 String[] word = command.split(" ");
                 int index = Integer.parseInt(word[1]) - 1;
-                tasks.get(index).markDone();
-                System.out.println("Nice! I've marked this task as done:\n " + tasks.get(index));
-                System.out.println("____________________________________________________________");
+                Task t = tasks.get(index);
+                t.markDone();
+                ui.sayTaskMarked(t, true);
             } else if (command.startsWith("unmark ")) {
-                System.out.println("____________________________________________________________");
                 String[] word = command.split(" ");
                 int index = Integer.parseInt(word[1]) - 1;
-                tasks.get(index).markUndone();
-                System.out.println("OK, I've marked this task as not done yet:\n " + tasks.get(index));
-                System.out.println("____________________________________________________________");
+                Task t = tasks.get(index);
+                t.markUndone();
+                ui.sayTaskMarked(t, false);
             } else if (command.startsWith("todo")) {
                 String description = command.substring(4).trim();;
                 if (description.isEmpty()) {
                     throw new SiriException("What is your todo task?");
                 }
                 Task task = new ToDo(description);
-                addTask(task);
+                tasks.add(task);
+                ui.sayTaskAdded(task, tasks.size());
             } else if (command.startsWith("event")) {
                 String[] word = command.split("/from|/to");
                 String description = word[0].substring(5).trim();
@@ -83,7 +81,8 @@ public class Siri {
                 String from = word[1].trim();
                 String to = word[2].trim();
                 Task task = new Event(description, from, to);
-                addTask(task);
+                tasks.add(task);
+                ui.sayTaskAdded(task, tasks.size());
             } else if (command.startsWith("deadline")) {
                 String[] words = command.split("/by", 2);
                 if (words.length < 2) {
@@ -98,36 +97,21 @@ public class Siri {
                 String by = words[1].trim();
                 try {
                     Task task = new Deadline(description, by);
-                    addTask(task);
+                    tasks.add(task);
+                    ui.sayTaskAdded(task, tasks.size());
                 } catch (java.time.format.DateTimeParseException e) {
                     throw new SiriException("Invalid date/time format. Please use yyyy-MM-dd HHmm, e.g., 2025-12-29 1800");
                 }
             } else if (command.startsWith("delete")) {
-                System.out.println("____________________________________________________________");
                 int index = Integer.parseInt(command.split(" ")[1]) - 1;
                 Task removedTask = tasks.remove(index);
-                System.out.println("Gotcha :) I've removed this task:\n " + removedTask);
-                System.out.println("Now you have " + tasks.size() + " tasks in the list.");
-                System.out.println("____________________________________________________________");
+                ui.sayTaskDeleted(removedTask, tasks.size());
             } else {
                 throw new SiriException("Sorry :((( I don't know what that means");
             }
     }
 
-    private static void print() {
-        System.out.println("____________________________________________________________");
-        System.out.println("Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
-        }
-        System.out.println("____________________________________________________________");
-    }
-
-    private static void addTask(Task task) {
-        System.out.println("____________________________________________________________");
-        tasks.add(task);
-        System.out.println("Got it :)) I've added this task:\n " + task);
-        System.out.println("Now you have " + tasks.size() + " task(s) in the list.");
-        System.out.println("____________________________________________________________");
+    public static void main(String[] args) {
+        new Siri(FILE_PATH).run();
     }
 }
