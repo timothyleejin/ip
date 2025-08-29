@@ -18,7 +18,7 @@ import java.util.Scanner;
 public class Siri {
     private static final String FILE_PATH = "./data/siri.txt";
 
-    private TaskList tasks;
+    protected TaskList tasks;
     private Storage storage;
     private Ui ui;
 
@@ -91,7 +91,7 @@ public class Siri {
         }
     }
 
-    private void performMarkAction(String description, boolean isMark) throws SiriException {
+    protected void performMarkAction(String description, boolean isMark) throws SiriException {
         if (description.isEmpty()) {
             throw new InvalidCommandException("Hi! Please specify a task number to " + (isMark ? "mark" : "unmark"));
         }
@@ -111,7 +111,7 @@ public class Siri {
         }
     }
 
-    private void performTodoAction(String description) throws SiriException {
+    protected void performTodoAction(String description) throws SiriException {
         if (description.isEmpty()) {
             throw new TaskNotFoundException("What is your todo task?");
         }
@@ -120,7 +120,7 @@ public class Siri {
         ui.sayTaskAdded(task, tasks.size());
     }
 
-    private void performEventAction(String arguments) throws SiriException {
+    protected void performEventAction(String arguments) throws SiriException {
         if (arguments.isEmpty()) {
             throw new InvalidCommandException("What is your event?");
         }
@@ -139,7 +139,7 @@ public class Siri {
         ui.sayTaskAdded(task, tasks.size());
     }
 
-    private void performDeadlineAction(String arguments) throws SiriException {
+    protected void performDeadlineAction(String arguments) throws SiriException {
         if (arguments.isEmpty()) {
             throw new InvalidCommandException("What is your deadline task?");
         }
@@ -163,7 +163,7 @@ public class Siri {
         }
     }
 
-    private void performDeleteAction(String arguments) throws SiriException {
+    protected void performDeleteAction(String arguments) throws SiriException {
         if (arguments.isEmpty()) {
             throw new InvalidCommandException("Please specify a task number to delete");
         }
