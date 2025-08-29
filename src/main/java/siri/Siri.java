@@ -10,6 +10,7 @@ import siri.tasktypes.Task;
 import siri.tasktypes.ToDo;
 import siri.tasktypes.TaskList;
 import siri.util.Ui;
+import siri.util.Parser;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -30,6 +31,7 @@ public class Siri {
             tasks = new TaskList();
         }
     }
+
     public void run() {
         ui.sayWelcome();
         Scanner scanner = new Scanner(System.in);
@@ -46,90 +48,135 @@ public class Siri {
     }
 
     private void executeCommand(String command) throws SiriException {
-            if (command.equalsIgnoreCase("bye")) {
+        String[] parsedCommand = Parser.parse(command);
+        String argument = parsedCommand[0].toLowerCase();
+        String userAction = parsedCommand.length > 1 ? parsedCommand[1] : "";
+
+        switch (argument) {
+            case "bye":
                 ui.sayGoodbye();
                 System.exit(0);
-            } else if (command.equalsIgnoreCase("list")) {
+                break;
+
+            case "list":
                 ui.sayTaskList(tasks.getAll());
-            } else if (command.startsWith("mark ")) {
-                try {
-                    String[] word = command.split(" ");
-                    int index = Integer.parseInt(word[1]) - 1;
-                    Task t = tasks.get(index);
-                    t.markDone();
-                    ui.sayTaskMarked(t, true);
-                } catch (IndexOutOfBoundsException e) {
-                    throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
-                } catch (NumberFormatException e) {
-                    throw new InvalidCommandException("Sorry, please key in a valid task number!");
-                }
-            } else if (command.startsWith("unmark ")) {
-                try {
-                    String[] word = command.split(" ");
-                    int index = Integer.parseInt(word[1]) - 1;
-                    Task t = tasks.get(index);
-                    t.markUndone();
-                    ui.sayTaskMarked(t, false);
-                } catch (IndexOutOfBoundsException e) {
-                    throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
-                } catch (NumberFormatException e) {
-                    throw new InvalidCommandException("Sorry, please key in a valid task number!");
-                }
-            } else if (command.startsWith("todo")) {
-                String description = command.substring(4).trim();;
-                if (description.isEmpty()) {
-                    throw new TaskNotFoundException("What is your todo task?");
-                }
-                Task task = new ToDo(description);
-                tasks.add(task);
-                ui.sayTaskAdded(task, tasks.size());
-            } else if (command.startsWith("event")) {
-                String[] word = command.split("/from|/to");
-                String description = word[0].substring(5).trim();
-                if (description.isEmpty()) {
-                    throw new InvalidCommandException("What is your event?");
-                }
-                if (word.length < 3) {
-                    throw new InvalidCommandException("Please specify the event duration using /from and /to.");
-                }
-                String from = word[1].trim();
-                String to = word[2].trim();
-                Task task = new Event(description, from, to);
-                tasks.add(task);
-                ui.sayTaskAdded(task, tasks.size());
-            } else if (command.startsWith("deadline")) {
-                String deadlineTask = command.substring(8).trim();
-                if (deadlineTask.isEmpty()) {
-                    throw new InvalidCommandException("What is your deadline task?");
-                }
-                String[] words = deadlineTask.split("/by", 2);
-                if (words.length < 2) {
-                    throw new InvalidCommandException(
-                            "Please specify the deadline using /by. Example: deadline return book /by 2025-12-29 1800"
-                    );
-                }
-                String description = words[0].trim();
-                String by = words[1].trim();
-                try {
-                    Task task = new Deadline(description, by);
-                    tasks.add(task);
-                    ui.sayTaskAdded(task, tasks.size());
-                } catch (java.time.format.DateTimeParseException e) {
-                    throw new InvalidCommandException("Please enter a valid date/time format (yyyy-MM-dd HHmm). Example: 2025-12-29 1800");
-                }
-            } else if (command.startsWith("delete")) {
-                try {
-                    int index = Integer.parseInt(command.split(" ")[1]) - 1;
-                    Task removedTask = tasks.remove(index);
-                    ui.sayTaskDeleted(removedTask, tasks.size());
-                } catch (IndexOutOfBoundsException e) {
-                    throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
-                } catch (NumberFormatException e) {
-                    throw new InvalidCommandException("Sorry, please key in a valid task number!");
-                }
-            } else {
+                break;
+
+            case "mark":
+                performMarkAction(userAction, true);
+                break;
+
+            case "unmark":
+                performMarkAction(userAction, false);
+                break;
+
+            case "todo":
+                performTodoAction(userAction);
+                break;
+
+            case "event":
+                performEventAction(userAction);
+                break;
+
+            case "deadline":
+                performDeadlineAction(userAction);
+                break;
+
+            case "delete":
+                performDeleteAction(userAction);
+                break;
+
+            default:
                 throw new InvalidCommandException("Sorry :((( I don't know what that means");
+        }
+    }
+
+    private void performMarkAction(String description, boolean isMark) throws SiriException {
+        if (description.isEmpty()) {
+            throw new InvalidCommandException("Hi! Please specify a task number to " + (isMark ? "mark" : "unmark"));
+        }
+        try {
+            int index = Integer.parseInt(description) - 1;
+            Task task = tasks.get(index);
+            if (isMark) {
+                task.markDone();
+            } else {
+                task.markUndone();
             }
+            ui.sayTaskMarked(task, isMark);
+        } catch (IndexOutOfBoundsException e) {
+            throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
+        } catch (NumberFormatException e) {
+            throw new InvalidCommandException("Sorry, please key in a valid task number!");
+        }
+    }
+
+    private void performTodoAction(String description) throws SiriException {
+        if (description.isEmpty()) {
+            throw new TaskNotFoundException("What is your todo task?");
+        }
+        Task task = new ToDo(description);
+        tasks.add(task);
+        ui.sayTaskAdded(task, tasks.size());
+    }
+
+    private void performEventAction(String arguments) throws SiriException {
+        if (arguments.isEmpty()) {
+            throw new InvalidCommandException("What is your event?");
+        }
+
+        String[] parts = arguments.split("/from|/to");
+        if (parts.length < 3) {
+            throw new InvalidCommandException("Please specify the event duration using /from and /to.");
+        }
+
+        String description = parts[0].trim();
+        String from = parts[1].trim();
+        String to = parts[2].trim();
+
+        Task task = new Event(description, from, to);
+        tasks.add(task);
+        ui.sayTaskAdded(task, tasks.size());
+    }
+
+    private void performDeadlineAction(String arguments) throws SiriException {
+        if (arguments.isEmpty()) {
+            throw new InvalidCommandException("What is your deadline task?");
+        }
+
+        String[] words = arguments.split("/by", 2);
+        if (words.length < 2) {
+            throw new InvalidCommandException(
+                    "Please specify the deadline using /by. Example: deadline return book /by 2025-12-29 1800"
+            );
+        }
+
+        String description = words[0].trim();
+        String by = words[1].trim();
+
+        try {
+            Task task = new Deadline(description, by);
+            tasks.add(task);
+            ui.sayTaskAdded(task, tasks.size());
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new InvalidCommandException("Please enter a valid date/time format (yyyy-MM-dd HHmm). Example: 2025-12-29 1800");
+        }
+    }
+
+    private void performDeleteAction(String arguments) throws SiriException {
+        if (arguments.isEmpty()) {
+            throw new InvalidCommandException("Please specify a task number to delete");
+        }
+
+        try {
+            int index = Integer.parseInt(arguments) - 1;
+            Task removedTask = tasks.remove(index);
+            ui.sayTaskDeleted(removedTask, tasks.size());
+        } catch (IndexOutOfBoundsException e) {
+            throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
+        } catch (NumberFormatException e) {
+            throw new InvalidCommandException("Sorry, please key in a valid task number!");
+        }
     }
 
     public static void main(String[] args) {
