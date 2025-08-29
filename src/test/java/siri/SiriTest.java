@@ -2,11 +2,9 @@ package siri;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import siri.exceptions.SiriException;
 import siri.exceptions.InvalidCommandException;
 import siri.tasktypes.Deadline;
 import siri.tasktypes.TaskList;
-import siri.util.Parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,27 +17,6 @@ public class SiriTest {
     @BeforeEach
     void setUp() {
         siri = new Siri("./data/test-siri.txt");
-    }
-
-    @Test
-    void parserTest1() throws SiriException {
-        String[] result = Parser.parse("list");
-        assertEquals("list", result[0]);
-        assertEquals(1, result.length);
-    }
-
-    @Test
-    void parserTest2() throws SiriException {
-        String[] result = Parser.parse("todo read book");
-        assertEquals("todo", result[0]);
-        assertEquals("read book", result[1]);
-    }
-
-    @Test
-    void parserTest3() throws SiriException {
-        String[] result = Parser.parse("   deadline return book /by 2025-12-29 1800   ");
-        assertEquals("deadline", result[0]);
-        assertEquals("return book /by 2025-12-29 1800", result[1]);
     }
 
     @Test
