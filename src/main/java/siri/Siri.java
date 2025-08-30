@@ -1,5 +1,7 @@
 package siri;
 
+import java.util.List;
+
 import siri.exceptions.SiriException;
 import siri.exceptions.TaskNotFoundException;
 import siri.exceptions.InvalidCommandException;
@@ -53,6 +55,7 @@ public class Siri {
         String userAction = parsedCommand.length > 1 ? parsedCommand[1] : "";
 
         switch (argument) {
+
             case "bye":
                 ui.sayGoodbye();
                 System.exit(0);
@@ -84,6 +87,10 @@ public class Siri {
 
             case "delete":
                 performDeleteAction(userAction);
+                break;
+
+            case "find":
+                performFindAction(userAction);
                 break;
 
             default:
@@ -177,6 +184,21 @@ public class Siri {
         } catch (NumberFormatException e) {
             throw new InvalidCommandException("Sorry, please key in a valid task number!");
         }
+    }
+
+    /**
+     * Finds and displays tasks that contain the given keyword in their description.
+     *
+     * @param keyword the search term to look for in task list.
+     * @throws InvalidCommandException if the keyword is empty.
+     */
+    protected void performFindAction(String keyword) throws SiriException {
+        if (keyword.isEmpty()) {
+            throw new InvalidCommandException("Please specify a keyword to search for. Example: find book");
+        }
+
+        List<Task> matchingTasks = tasks.findTasks(keyword);
+        ui.sayMatchingTasks(matchingTasks, keyword);
     }
 
     public static void main(String[] args) {
