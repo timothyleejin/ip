@@ -11,7 +11,6 @@ package siri.exceptions;
  * @see InvalidCommandException
  * @see TaskNotFoundException
  */
-
 public class SiriException extends Exception {
 
     /**
@@ -22,7 +21,6 @@ public class SiriException extends Exception {
      * @param message the message that explains the reason for the exception.
      *                The message should be clear and helpful for troubleshooting.
      */
-
     public SiriException(String message) {
         super(message);
     }

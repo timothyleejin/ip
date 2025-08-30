@@ -7,7 +7,6 @@ package siri.exceptions;
  *
  * @see SiriException
  */
-
 public class InvalidCommandException extends SiriException {
 
     /**
@@ -18,7 +17,6 @@ public class InvalidCommandException extends SiriException {
      * @param message the message that explains the reason for the exception.
      *                The message should be clear and helpful for troubleshooting.
      */
-
     public InvalidCommandException(String message) {
         super(message);
     }

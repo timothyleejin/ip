@@ -7,7 +7,6 @@ package siri.exceptions;
  *
  * @see SiriException
  */
-
 public class TaskNotFoundException extends SiriException {
 
     /**
@@ -17,7 +16,6 @@ public class TaskNotFoundException extends SiriException {
      *
      * @param message the message that explains the reason for the exception
      */
-
     public TaskNotFoundException(String message) {
         super(message);
     }

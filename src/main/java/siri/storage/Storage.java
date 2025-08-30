@@ -22,7 +22,6 @@ import java.util.List;
  * @see #load()
  * @see #save(List)
  */
-
 public class Storage {
     private Path filePath;
 
@@ -33,7 +32,6 @@ public class Storage {
      * @param path the file system path where task data will be persisted.
      *             This can be a relative or absolute path to the data file.
      */
-
     public Storage(String path) {
         this.filePath = Paths.get(path);
     }
@@ -48,7 +46,6 @@ public class Storage {
      *         such as disk errors.
      * @see Task#fromFileString(String)
      */
-
     public List<Task> load() throws IOException {
         List<Task> tasks = new ArrayList<>();
         if (!Files.exists(filePath)) {
@@ -79,7 +76,6 @@ public class Storage {
      *         such as disk or storage issues.
      * @see Task#toFileString()
      */
-
     public void save(List<Task> tasks) throws IOException {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(filePath.toFile()))) {
             for (Task task : tasks) {
