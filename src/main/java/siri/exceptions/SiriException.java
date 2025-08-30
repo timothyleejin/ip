@@ -4,9 +4,8 @@ package siri.exceptions;
  * The base exception class for all Siri exceptions.
  * This class extends the Java {@link Exception} class to provide
  * a common foundation for all custom exceptions in this chatbot.
- *
- * <p>All Siri-specific exceptions should extend this class to maintain
- * consistent exception handling throughout the application.</p>
+ * All Siri-specific exceptions should extend this class to maintain
+ * consistent exception handling throughout the application.
  *
  * @see Exception
  * @see InvalidCommandException
