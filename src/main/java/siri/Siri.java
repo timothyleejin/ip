@@ -53,7 +53,6 @@ public class Siri {
                 isExit = true;
                 return ui.getGoodbyeMessage();
             }
-
             String response = executeCommand(input);
             storage.save(tasks.getAll());
             return response;
