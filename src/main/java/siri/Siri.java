@@ -1,6 +1,7 @@
 package siri;
 
 import java.util.List;
+import java.util.Scanner;
 
 import siri.exceptions.SiriException;
 import siri.exceptions.TaskNotFoundException;
@@ -15,14 +16,13 @@ import siri.util.Ui;
 import siri.util.Parser;
 
 import java.io.IOException;
-import java.util.Scanner;
 
 public class Siri {
     private static final String FILE_PATH = "./data/siri.txt";
-
     protected TaskList tasks;
     private Storage storage;
     private Ui ui;
+    private boolean isExit = false;
 
     public Siri(String filePath) {
         ui = new Ui();
@@ -34,71 +34,74 @@ public class Siri {
         }
     }
 
-    public void run() {
-        ui.sayWelcome();
-        Scanner scanner = new Scanner(System.in);
+    /**
+     * Overloaded Siri constructor that takes in no arguments
+     */
+    public Siri() {
+        this(FILE_PATH);
+    }
 
-        while (true) {
-            String command = scanner.nextLine();
-            try {
-                executeCommand(command);
-                storage.save(tasks.getAll());
-            } catch (SiriException | IOException e) {
-                ui.sayError(e.getMessage());
+    /**
+     * This method is used by GUI and gets the response from Siri for the given input command.
+     *
+     * @param input the user input command
+     * @return the response from Siri
+     */
+    public String getResponse(String input) {
+        try {
+            if (input.trim().equalsIgnoreCase("bye")) {
+                isExit = true;
+                return ui.getGoodbyeMessage();
             }
+
+            String response = executeCommand(input);
+            storage.save(tasks.getAll());
+            return response;
+        } catch (SiriException | IOException e) {
+            return ui.getErrorMessage(e.getMessage());
         }
     }
 
-    private void executeCommand(String command) throws SiriException {
+    private String executeCommand(String command) throws SiriException {
         String[] parsedCommand = Parser.parse(command);
         String argument = parsedCommand[0].toLowerCase();
         String userAction = parsedCommand.length > 1 ? parsedCommand[1] : "";
 
         switch (argument) {
+        case "bye":
+            isExit = true;
+            return ui.getGoodbyeMessage();
 
-            case "bye":
-                ui.sayGoodbye();
-                System.exit(0);
-                break;
+        case "list":
+            return ui.getTaskListMessage(tasks.getAll());
 
-            case "list":
-                ui.sayTaskList(tasks.getAll());
-                break;
+        case "mark":
+            return performMarkAction(userAction, true);
 
-            case "mark":
-                performMarkAction(userAction, true);
-                break;
+        case "unmark":
+            return performMarkAction(userAction, false);
 
-            case "unmark":
-                performMarkAction(userAction, false);
-                break;
+        case "todo":
+            return performTodoAction(userAction);
 
-            case "todo":
-                performTodoAction(userAction);
-                break;
+        case "event":
+            return performEventAction(userAction);
 
-            case "event":
-                performEventAction(userAction);
-                break;
+        case "deadline":
+            return performDeadlineAction(userAction);
 
-            case "deadline":
-                performDeadlineAction(userAction);
-                break;
+        case "delete":
+            return performDeleteAction(userAction);
 
-            case "delete":
-                performDeleteAction(userAction);
-                break;
+        case "find":
+            return performFindAction(userAction);
 
-            case "find":
-                performFindAction(userAction);
-                break;
-
-            default:
-                throw new InvalidCommandException("Sorry :((( I don't know what that means");
+        default:
+            throw new InvalidCommandException("Sorry :((( I don't know what that means");
         }
     }
 
-    protected void performMarkAction(String description, boolean isMark) throws SiriException {
+    protected String performMarkAction(String description, boolean isMark) throws SiriException {
         if (description.isEmpty()) {
             throw new InvalidCommandException("Hi! Please specify a task number to " + (isMark ? "mark" : "unmark"));
         }
@@ -110,7 +113,7 @@ public class Siri {
             } else {
                 task.markUndone();
             }
-            ui.sayTaskMarked(task, isMark);
+            return ui.getTaskMarkedMessage(task, isMark);
         } catch (IndexOutOfBoundsException e) {
             throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
         } catch (NumberFormatException e) {
@@ -118,16 +121,16 @@ public class Siri {
         }
     }
 
-    protected void performTodoAction(String description) throws SiriException {
+    protected String performTodoAction(String description) throws SiriException {
         if (description.isEmpty()) {
             throw new TaskNotFoundException("What is your todo task?");
         }
         Task task = new ToDo(description);
         tasks.add(task);
-        ui.sayTaskAdded(task, tasks.size());
+        return ui.getTaskAddedMessage(task, tasks.size());
     }
 
-    protected void performEventAction(String arguments) throws SiriException {
+    protected String performEventAction(String arguments) throws SiriException {
         if (arguments.isEmpty()) {
             throw new InvalidCommandException("What is your event?");
         }
@@ -143,10 +146,10 @@ public class Siri {
 
         Task task = new Event(description, from, to);
         tasks.add(task);
-        ui.sayTaskAdded(task, tasks.size());
+        return ui.getTaskAddedMessage(task, tasks.size());
     }
 
-    protected void performDeadlineAction(String arguments) throws SiriException {
+    protected String performDeadlineAction(String arguments) throws SiriException {
         if (arguments.isEmpty()) {
             throw new InvalidCommandException("What is your deadline task?");
         }
@@ -164,13 +167,13 @@ public class Siri {
         try {
             Task task = new Deadline(description, by);
             tasks.add(task);
-            ui.sayTaskAdded(task, tasks.size());
+            return ui.getTaskAddedMessage(task, tasks.size());
         } catch (java.time.format.DateTimeParseException e) {
             throw new InvalidCommandException("Please enter a valid date/time format (yyyy-MM-dd HHmm). Example: 2025-12-29 1800");
         }
     }
 
-    protected void performDeleteAction(String arguments) throws SiriException {
+    protected String performDeleteAction(String arguments) throws SiriException {
         if (arguments.isEmpty()) {
             throw new InvalidCommandException("Please specify a task number to delete");
         }
@@ -178,7 +181,7 @@ public class Siri {
         try {
             int index = Integer.parseInt(arguments) - 1;
             Task removedTask = tasks.remove(index);
-            ui.sayTaskDeleted(removedTask, tasks.size());
+            return ui.getTaskDeletedMessage(removedTask, tasks.size());
         } catch (IndexOutOfBoundsException e) {
             throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
         } catch (NumberFormatException e) {
@@ -192,16 +195,32 @@ public class Siri {
      * @param keyword the search term to look for in task list.
      * @throws InvalidCommandException if the keyword is empty.
      */
-    protected void performFindAction(String keyword) throws SiriException {
+    protected String performFindAction(String keyword) throws SiriException {
         if (keyword.isEmpty()) {
             throw new InvalidCommandException("Please specify a keyword to search for. Example: find book");
         }
 
         List<Task> matchingTasks = tasks.findTasks(keyword);
-        ui.sayMatchingTasks(matchingTasks, keyword);
+        return ui.getMatchingTasksMessage(matchingTasks, keyword);
     }
 
     public static void main(String[] args) {
         new Siri(FILE_PATH).run();
+    }
+
+    private void run() {
+        ui.sayWelcome();
+        Scanner scanner = new Scanner(System.in);
+
+        while (!isExit) {
+            String command = scanner.nextLine();
+            try {
+                String response = executeCommand(command);
+                System.out.println(response);
+                storage.save(tasks.getAll());
+            } catch (SiriException | IOException e) {
+                System.out.println(ui.getErrorMessage(e.getMessage()));
+            }
+        }
     }
 }

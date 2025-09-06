@@ -1,2 +1,1 @@
-D | 0 | read | 2025-12-29 1800
-T | 0 | read book
+T | 0 | read
