@@ -18,6 +18,7 @@ public class Ui {
     }
 
     public String getTaskListMessage(List<Task> tasks) {
+        assert tasks != null : "Task list should not be null";
         if (tasks.isEmpty()) {
             return "Your task list is empty!";
         }
@@ -30,18 +31,25 @@ public class Ui {
     }
 
     public String getTaskMarkedMessage(Task task, boolean isMarked) {
+        assert task != null : "Task should not be null when marking";
         return "Nice! I've marked this task as " + (isMarked ? "done:\n" : "not done yet:\n") + task;
     }
 
     public String getTaskAddedMessage(Task task, int totalTasks) {
+        assert task != null : "Task should not be null when adding";
+        assert totalTasks >= 0 : "Total tasks should be non-negative";
         return "Got it. I've added this task:\n" + task + "\nNow you have " + totalTasks + " task(s) in the list.";
     }
 
     public String getTaskDeletedMessage(Task task, int totalTasks) {
+        assert task != null : "Task should not be null when deleting";
+        assert totalTasks >= 0 : "Total tasks should be non-negative";
         return "Noted. I've removed this task:\n" + task + "\nNow you have " + totalTasks + " task(s) in the list.";
     }
 
     public String getMatchingTasksMessage(List<Task> matchingTasks, String keyword) {
+        assert matchingTasks != null : "Matching tasks list should not be null";
+        assert keyword != null : "Keyword should not be null";
         if (matchingTasks.isEmpty()) {
             return "No tasks found containing: " + keyword;
         }

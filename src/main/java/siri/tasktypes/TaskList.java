@@ -19,6 +19,7 @@ public class TaskList {
      */
     public TaskList() {
         this.tasks = new ArrayList<>();
+        assert tasks != null : "Task list should be initialized";
     }
 
     /**
@@ -28,6 +29,7 @@ public class TaskList {
      */
     public TaskList(List<Task> tasks) {
         this.tasks = tasks;
+        assert tasks != null : "Task list provided should not be null";
     }
 
     /**
@@ -36,7 +38,12 @@ public class TaskList {
      * @param task the task to be added to the list.
      */
     public void add(Task task) {
+        assert task != null : "Cannot add a null task";
+        int sizeBefore = tasks.size();
         tasks.add(task);
+        assert tasks.size() == sizeBefore + 1 : "Task should be added to the task list";
+        assert tasks.get(tasks.size() - 1) == task : "Last task should be the one just added";
+
     }
 
     /**
@@ -47,7 +54,10 @@ public class TaskList {
      * @return the task that was removed from the list.
      */
     public Task remove(int index) {
-        return tasks.remove(index);
+        assert index >= 0 && index < tasks.size() : "Index out of bounds for remove";
+        Task removed = tasks.remove(index);
+        assert removed != null : "Removed task should not be null";
+        return removed;
     }
 
     /**
@@ -57,7 +67,10 @@ public class TaskList {
      * @return the task at the specified position.
      */
     public Task get(int index) {
-        return tasks.get(index);
+        assert index >= 0 && index < tasks.size() : "Index out of bounds for get";
+        Task task = tasks.get(index);
+        assert task != null : "Task retrieved should not be null";
+        return task;
     }
 
     /**
@@ -66,7 +79,9 @@ public class TaskList {
      * @return the number of tasks in this list.
      */
     public int size() {
-        return tasks.size();
+        int size = tasks.size();
+        assert size >= 0 : "Task list size should never be negative";
+        return size;
     }
 
     /**
@@ -75,6 +90,7 @@ public class TaskList {
      * @return the list of all the tasks.
      */
     public List<Task> getAll() {
+        assert tasks != null : "Task list should not be null when returning all tasks";
         return tasks;
     }
 
@@ -85,14 +101,17 @@ public class TaskList {
      * @return a list of tasks that matches the search term.
      */
     public List<Task> findTasks(String keyword) {
+        assert keyword != null : "Search keyword should not be null";
         List<Task> matchingTasks = new ArrayList<>();
         String lowerKeyword = keyword.toLowerCase();
 
         for (Task task : tasks) {
+            assert task != null : "Task in list should not be null";
             if (task.getDescription().toLowerCase().contains(lowerKeyword)) {
                 matchingTasks.add(task);
             }
         }
+        assert matchingTasks != null : "Matching task list should not be null";
         return matchingTasks;
     }
 }

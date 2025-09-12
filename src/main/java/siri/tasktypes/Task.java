@@ -23,6 +23,7 @@ public abstract class Task {
      * @param description the description of the task.
      */
     public Task(String description) {
+        assert description != null : "Task description should not be null";
         this.description = description;
         this.isDone = false;
     }
@@ -33,6 +34,7 @@ public abstract class Task {
      * @return the task description text.
      */
     public String getDescription() {
+        assert description != null : "Task description should not be null";
         return description;
     }
 
@@ -77,7 +79,9 @@ public abstract class Task {
      * @see #toFileString()
      */
     public static Task fromFileString(String line) {
+        assert line != null : "File line passed to Task.fromFileString should not be null";
         String[] parts = line.split(" \\| ");
+        assert parts.length >= 3 : "File line should have at least 3 parts";
         String type = parts[0];
         boolean isDone = parts[1].equals("1");
         String description = parts[2];
@@ -90,12 +94,14 @@ public abstract class Task {
                 }
                 return t;
             case "D":
+                assert parts.length >= 4 : "Deadline line must have 4 parts";
                 Task d = new Deadline(description, parts[3]);
                 if (isDone) {
                     d.markDone();
                 }
                 return d;
             case "E":
+                assert parts.length >= 5 : "Event line must have 5 parts";
                 Task e = new Event(description, parts[3], parts[4]);
                 if (isDone) {
                     e.markDone();
@@ -113,6 +119,7 @@ public abstract class Task {
      */
     @Override
     public String toString() {
+        assert description != null : "Task description should never be null";
         return "[" + getStatusIcon() + "] " + description;
     }
 }
