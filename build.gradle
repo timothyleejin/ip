@@ -53,6 +53,10 @@ shadowJar {
     archiveClassifier = null
 }
 
+run {
+    enableAssertions = true
+}
+
 run{
     standardInput = System.in
 }

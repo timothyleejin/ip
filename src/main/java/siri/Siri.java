@@ -32,6 +32,9 @@ public class Siri {
         } catch (Exception e) {
             tasks = new TaskList();
         }
+        assert tasks != null : "TaskList should be initialised";
+        assert ui != null : "UI should be initialised";
+        assert storage != null : "Storage should be initialised";
     }
 
     /**
@@ -48,6 +51,7 @@ public class Siri {
      * @return the response from Siri
      */
     public String getResponse(String input) {
+        assert input != null : "Input command should not be null";
         try {
             if (input.trim().equalsIgnoreCase("bye")) {
                 isExit = true;
@@ -62,7 +66,9 @@ public class Siri {
     }
 
     private String executeCommand(String command) throws SiriException {
+        assert command != null : "Command should not be null";
         String[] parsedCommand = Parser.parse(command);
+        assert parsedCommand != null && parsedCommand.length > 0 : "Parsed command should not be null or empty";
         String argument = parsedCommand[0].toLowerCase();
         String userAction = parsedCommand.length > 1 ? parsedCommand[1] : "";
 
@@ -101,12 +107,17 @@ public class Siri {
     }
 
     protected String performMarkAction(String description, boolean isMark) throws SiriException {
+        assert description != null : "Task description should not be null";
+        assert tasks != null : "TaskList should be initialised";
+
         if (description.isEmpty()) {
             throw new InvalidCommandException("Hi! Please specify a task number to " + (isMark ? "mark" : "unmark"));
         }
         try {
             int index = Integer.parseInt(description) - 1;
+            assert index >= 0 : "Task index should be non-negative";
             Task task = tasks.get(index);
+            assert task != null : "Task at index should exist";
             if (isMark) {
                 task.markDone();
             } else {
@@ -121,15 +132,18 @@ public class Siri {
     }
 
     protected String performTodoAction(String description) throws SiriException {
+        assert description != null : "Todo description should not be null";
         if (description.isEmpty()) {
             throw new TaskNotFoundException("What is your todo task?");
         }
         Task task = new ToDo(description);
         tasks.add(task);
+        assert tasks.get(tasks.size() - 1) == task : "Task should be added to the task list";
         return ui.getTaskAddedMessage(task, tasks.size());
     }
 
     protected String performEventAction(String arguments) throws SiriException {
+        assert arguments != null : "Event arguments should not be null";
         if (arguments.isEmpty()) {
             throw new InvalidCommandException("What is your event?");
         }
@@ -145,10 +159,13 @@ public class Siri {
 
         Task task = new Event(description, from, to);
         tasks.add(task);
+        assert tasks.get(tasks.size() - 1) == task : "Event should be added to the task list";
+
         return ui.getTaskAddedMessage(task, tasks.size());
     }
 
     protected String performDeadlineAction(String arguments) throws SiriException {
+        assert arguments != null : "Deadline arguments should not be null";
         if (arguments.isEmpty()) {
             throw new InvalidCommandException("What is your deadline task?");
         }
@@ -166,6 +183,7 @@ public class Siri {
         try {
             Task task = new Deadline(description, by);
             tasks.add(task);
+            assert tasks.get(tasks.size() - 1) == task : "Deadline should be added to the task list";
             return ui.getTaskAddedMessage(task, tasks.size());
         } catch (java.time.format.DateTimeParseException e) {
             throw new InvalidCommandException("Please enter a valid date/time format (yyyy-MM-dd HHmm). Example: 2025-12-29 1800");
@@ -173,13 +191,16 @@ public class Siri {
     }
 
     protected String performDeleteAction(String arguments) throws SiriException {
+        assert arguments != null : "Delete argument should not be null";
         if (arguments.isEmpty()) {
             throw new InvalidCommandException("Please specify a task number to delete");
         }
 
         try {
             int index = Integer.parseInt(arguments) - 1;
+            assert index >= 0 : "Task index should be non-negative";
             Task removedTask = tasks.remove(index);
+            assert removedTask != null : "Removed task should exist";
             return ui.getTaskDeletedMessage(removedTask, tasks.size());
         } catch (IndexOutOfBoundsException e) {
             throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
@@ -195,11 +216,13 @@ public class Siri {
      * @throws InvalidCommandException if the keyword is empty.
      */
     protected String performFindAction(String keyword) throws SiriException {
+        assert keyword != null : "Search keyword should not be null";
         if (keyword.isEmpty()) {
             throw new InvalidCommandException("Please specify a keyword to search for. Example: find book");
         }
 
         List<Task> matchingTasks = tasks.findTasks(keyword);
+        assert matchingTasks != null : "Matching tasks list should not be null";
         return ui.getMatchingTasksMessage(matchingTasks, keyword);
     }
 

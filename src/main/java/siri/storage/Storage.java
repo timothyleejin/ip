@@ -33,7 +33,9 @@ public class Storage {
      *             This can be a relative or absolute path to the data file.
      */
     public Storage(String path) {
+        assert path != null : "Path passed to Storage constructor should not be null";
         this.filePath = Paths.get(path);
+        assert filePath != null : "filePath should not be null after initialisation";
     }
 
     /**
@@ -48,6 +50,7 @@ public class Storage {
      */
     public List<Task> load() throws IOException {
         List<Task> tasks = new ArrayList<>();
+        assert tasks != null : "Tasks list should be initialized";
         if (!Files.exists(filePath)) {
             Files.createDirectories(filePath.getParent());
             Files.createFile(filePath);
@@ -63,6 +66,7 @@ public class Storage {
                 }
             }
         }
+        assert tasks != null : "Tasks list should not be null after loading";
         return tasks;
     }
 
@@ -77,8 +81,10 @@ public class Storage {
      * @see Task#toFileString()
      */
     public void save(List<Task> tasks) throws IOException {
+        assert tasks != null : "Task list passed to save() should not be null";
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(filePath.toFile()))) {
             for (Task task : tasks) {
+                assert task != null : "Task in list should not be null when saving";
                 bufferedWriter.write(task.toFileString());
                 bufferedWriter.newLine();
             }
