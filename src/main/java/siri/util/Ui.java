@@ -22,12 +22,7 @@ public class Ui {
         if (tasks.isEmpty()) {
             return "Your task list is empty!";
         }
-
-        StringBuilder sb = new StringBuilder("Here are the tasks in your list:\n");
-        for (int i = 0; i < tasks.size(); i++) {
-            sb.append((i + 1) + "." + tasks.get(i) + "\n");
-        }
-        return sb.toString();
+        return buildTaskListMessage("Here are the tasks in your list:", tasks);
     }
 
     public String getTaskMarkedMessage(Task task, boolean isMarked) {
@@ -53,15 +48,21 @@ public class Ui {
         if (matchingTasks.isEmpty()) {
             return "No tasks found containing: " + keyword;
         }
-
-        StringBuilder sb = new StringBuilder("Here are the matching tasks in your list:\n");
-        for (int i = 0; i < matchingTasks.size(); i++) {
-            sb.append((i + 1) + "." + matchingTasks.get(i) + "\n");
-        }
-        return sb.toString();
+        return buildTaskListMessage("Here are the matching tasks in your list:", matchingTasks);
     }
 
     public void sayWelcome() {
         System.out.println(getWelcomeMessage());
+    }
+
+    /**
+     * Method to format a list of tasks for display.
+     */
+    private String buildTaskListMessage(String header, List<Task> tasks) {
+        StringBuilder sb = new StringBuilder(header).append("\n");
+        for (int i = 0; i < tasks.size(); i++) {
+            sb.append((i + 1)).append(".").append(tasks.get(i)).append("\n");
+        }
+        return sb.toString();
     }
 }

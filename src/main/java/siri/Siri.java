@@ -67,43 +67,46 @@ public class Siri {
 
     private String executeCommand(String command) throws SiriException {
         assert command != null : "Command should not be null";
-        String[] parsedCommand = Parser.parse(command);
+        String[] parsedCommand = Parser.parseCommand(command);
         assert parsedCommand != null && parsedCommand.length > 0 : "Parsed command should not be null or empty";
+        return dispatchCommand(parsedCommand);
+    }
+
+    private String dispatchCommand(String[] parsedCommand) throws SiriException {
         String argument = parsedCommand[0].toLowerCase();
         String userAction = parsedCommand.length > 1 ? parsedCommand[1] : "";
 
         switch (argument) {
         case "bye":
-            isExit = true;
-            return ui.getGoodbyeMessage();
-
+            return performExitAction();
         case "list":
-            return ui.getTaskListMessage(tasks.getAll());
-
+            return performListAction();
         case "mark":
             return performMarkAction(userAction, true);
-
         case "unmark":
             return performMarkAction(userAction, false);
-
         case "todo":
             return performTodoAction(userAction);
-
         case "event":
             return performEventAction(userAction);
-
         case "deadline":
             return performDeadlineAction(userAction);
-
         case "delete":
             return performDeleteAction(userAction);
-
         case "find":
             return performFindAction(userAction);
-
         default:
             throw new InvalidCommandException("Sorry :((( I don't know what that means");
         }
+    }
+
+    private String performExitAction() {
+        isExit = true;
+        return ui.getGoodbyeMessage();
+    }
+
+    private String performListAction() {
+        return ui.getTaskListMessage(tasks.getAll());
     }
 
     protected String performMarkAction(String description, boolean isMark) throws SiriException {
@@ -143,47 +146,17 @@ public class Siri {
     }
 
     protected String performEventAction(String arguments) throws SiriException {
-        assert arguments != null : "Event arguments should not be null";
-        if (arguments.isEmpty()) {
-            throw new InvalidCommandException("What is your event?");
-        }
-
-        String[] parts = arguments.split("/from|/to");
-        if (parts.length < 3) {
-            throw new InvalidCommandException("Please specify the event duration using /from and /to.");
-        }
-
-        String description = parts[0].trim();
-        String from = parts[1].trim();
-        String to = parts[2].trim();
-
-        Task task = new Event(description, from, to);
+        String[] parts = Parser.parseEvent(arguments);
+        Task task = new Event(parts[0], parts[1], parts[2]);
         tasks.add(task);
-        assert tasks.get(tasks.size() - 1) == task : "Event should be added to the task list";
-
         return ui.getTaskAddedMessage(task, tasks.size());
     }
 
     protected String performDeadlineAction(String arguments) throws SiriException {
-        assert arguments != null : "Deadline arguments should not be null";
-        if (arguments.isEmpty()) {
-            throw new InvalidCommandException("What is your deadline task?");
-        }
-
-        String[] words = arguments.split("/by", 2);
-        if (words.length < 2) {
-            throw new InvalidCommandException(
-                    "Please specify the deadline using /by. Example: deadline return book /by 2025-12-29 1800"
-            );
-        }
-
-        String description = words[0].trim();
-        String by = words[1].trim();
-
+        String[] parts = Parser.parseDeadline(arguments);
         try {
-            Task task = new Deadline(description, by);
+            Task task = new Deadline(parts[0], parts[1]);
             tasks.add(task);
-            assert tasks.get(tasks.size() - 1) == task : "Deadline should be added to the task list";
             return ui.getTaskAddedMessage(task, tasks.size());
         } catch (java.time.format.DateTimeParseException e) {
             throw new InvalidCommandException("Please enter a valid date/time format (yyyy-MM-dd HHmm). Example: 2025-12-29 1800");
