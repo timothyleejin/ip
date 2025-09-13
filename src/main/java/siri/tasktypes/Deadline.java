@@ -22,15 +22,6 @@ public class Deadline extends Task {
     private static final DateTimeFormatter OUTPUT_FORMAT = DateTimeFormatter.ofPattern("MMM d yyyy h:mma");
 
     /**
-     * Returns the due date and time of this task.
-     *
-     * @return the LocalDateTime representing the deadline of this task.
-     */
-    public LocalDateTime getBy() {
-        return by;
-    }
-
-    /**
      * Constructs a new Deadline task with the description and deadline.
      * It is initially marked as not done.
      *

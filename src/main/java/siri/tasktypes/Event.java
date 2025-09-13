@@ -1,6 +1,7 @@
 package siri.tasktypes;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Represents an event task with a specific start and end time attached.
@@ -8,27 +9,47 @@ import java.time.LocalDateTime;
  * and completion status, inheriting all basic task functionality
  * from the {@link Task} base class.
  *
- * <p>Event tasks are stored in the file format: {@code E | status | description | from | to}</p>
+ * <p>Event tasks are stored in the file format: {@code E | status | description | yyyy-MM-dd HHmm | yyyy-MM-dd HHmm}</p>
  *
  * @see Task
  * @see #toFileString()
  */
 public class Event extends Task {
-    protected String from;
-    protected String to;
+    protected LocalDateTime from;
+    protected LocalDateTime to;
+
+    private static final DateTimeFormatter INPUT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+    private static final DateTimeFormatter OUTPUT_FORMAT = DateTimeFormatter.ofPattern("MMM d yyyy h:mma");
 
     /**
-     * Constructs a new event task with the description and time period, all in Strings.
+     * Constructs a new event task with the description and time period.
      * It is initially marked as not done.
      *
      * @param description the description of the event task.
-     * @param from the start time or date of the event.
-     * @param to the end time or date of the event.
+     * @param from the start time string in "yyyy-MM-dd HHmm" format.
+     * @param to the end time string in "yyyy-MM-dd HHmm" format.
      */
     public Event(String description, String from, String to) {
         super(description);
-        this.from = from;
-        this.to = to;
+        this.from = LocalDateTime.parse(from, INPUT_FORMAT);
+        this.to = LocalDateTime.parse(to, INPUT_FORMAT);
+        if (this.to.isBefore(this.from)) {
+            throw new IllegalArgumentException("Heyyy your end time cannot be before start time.");
+        }
+    }
+
+    /**
+     * Returns the start time of the event.
+     */
+    public LocalDateTime getFrom() {
+        return from;
+    }
+
+    /**
+     * Returns the end time of the event.
+     */
+    public LocalDateTime getTo() {
+        return to;
     }
 
     /**
@@ -39,7 +60,8 @@ public class Event extends Task {
      */
     @Override
     public String toFileString() {
-        return "E | " + (isDone ? "1" : "0") + " | " + description + " | " + from + " | " + to;
+        return "E | " + (isDone ? "1" : "0") + " | " + description + " | "
+                + from.format(INPUT_FORMAT) + " | " + to.format(INPUT_FORMAT);
     }
 
     /**
@@ -49,6 +71,7 @@ public class Event extends Task {
      */
     @Override
     public String toString() {
-        return "[E]" + super.toString() + " (from: " + from + " to: " + to + ")";
+        return "[E]" + super.toString() + " (from: " + from.format(OUTPUT_FORMAT)
+                + " to: " + to.format(OUTPUT_FORMAT) + ")";
     }
 }

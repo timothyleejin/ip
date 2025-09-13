@@ -24,11 +24,6 @@ public class Parser {
      * Parses an event string in the format: "description /from start /to end"
      */
     public static String[] parseEvent(String arguments) throws SiriException {
-        assert arguments != null : "Event arguments passed to parseEvent should not be null";
-        if (arguments.isEmpty()) {
-            throw new InvalidCommandException("What is your event?");
-        }
-
         String[] parts = arguments.split("/from|/to");
         if (parts.length < 3) {
             throw new InvalidCommandException("Please specify the event duration using /from and /to.");
@@ -47,11 +42,6 @@ public class Parser {
      * Parses a deadline string in the format: "description /by date"
      */
     public static String[] parseDeadline(String arguments) throws SiriException {
-        assert arguments != null : "Deadline arguments passed to parseDeadline should not be null";
-        if (arguments.isEmpty()) {
-            throw new InvalidCommandException("What is your deadline task?");
-        }
-
         String[] parts = arguments.split("/by", 2);
         if (parts.length < 2) {
             throw new InvalidCommandException(

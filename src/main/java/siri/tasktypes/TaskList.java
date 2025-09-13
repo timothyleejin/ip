@@ -40,6 +40,7 @@ public class TaskList {
     public void add(Task task) {
         assert task != null : "Cannot add a null task";
         int sizeBefore = tasks.size();
+        detectScheduleClash(task);
         tasks.add(task);
         assert tasks.size() == sizeBefore + 1 : "Task should be added to the task list";
         assert tasks.get(tasks.size() - 1) == task : "Last task should be the one just added";
@@ -114,4 +115,35 @@ public class TaskList {
         assert matchingTasks != null : "Matching task list should not be null";
         return matchingTasks;
     }
+
+    /**
+     * Detects scheduling anomalies for Event tasks.
+     * Throws IllegalArgumentException if there is overlap.
+     */
+    private void detectScheduleClash(Task newTask) {
+        if (!(newTask instanceof Event)) {
+            return;
+        }
+
+        Event newEvent = (Event) newTask;
+
+        for (Task existing : tasks) {
+            if (isEvent(existing) && eventsOverlap(newEvent, (Event) existing)) {
+                throw new IllegalArgumentException(buildClashMessage(newEvent, (Event) existing));
+            }
+        }
+    }
+
+    private boolean isEvent(Task task) {
+        return task instanceof Event;
+    }
+
+    private boolean eventsOverlap(Event a, Event b) {
+        return !(a.getTo().isBefore(b.getFrom()) || a.getFrom().isAfter(b.getTo()));
+    }
+
+    private String buildClashMessage(Event newEvent, Event existing) {
+        return "Mate, schedule clashes! " + newEvent + " overlaps with " + existing;
+    }
+
 }

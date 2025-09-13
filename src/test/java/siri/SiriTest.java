@@ -43,7 +43,7 @@ public class SiriTest {
                 InvalidCommandException.class,
                 () -> siri.performDeadlineAction("return book /by not-a-date")
         );
-        assertTrue(exception.getMessage().contains("Please enter a valid date/time format"));
+        assertTrue(exception.getMessage().contains("Please enter a valid date & time format (yyyy-MM-dd HHmm). Example: /by 2025-12-29 1800"));
     }
 }
 

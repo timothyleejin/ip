@@ -146,20 +146,37 @@ public class Siri {
     }
 
     protected String performEventAction(String arguments) throws SiriException {
+        assert arguments != null : "Event arguments passed to parseEvent should not be null";
+        if (arguments.isEmpty()) {
+            throw new InvalidCommandException("What is your event?");
+        }
         String[] parts = Parser.parseEvent(arguments);
-        Task task = new Event(parts[0], parts[1], parts[2]);
-        tasks.add(task);
-        return ui.getTaskAddedMessage(task, tasks.size());
+        try {
+            Task task = new Event(parts[0], parts[1], parts[2]);
+            tasks.add(task);
+            return ui.getTaskAddedMessage(task, tasks.size());
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new InvalidCommandException(
+                    "Please enter valid date & time formats (yyyy-MM-dd HHmm). Example: /from 2025-12-29 1800 /to 2025-12-29 2000"
+            );
+        } catch (IllegalArgumentException e) {
+            throw new InvalidCommandException(e.getMessage());
+        }
     }
 
     protected String performDeadlineAction(String arguments) throws SiriException {
+        assert arguments != null : "Deadline arguments passed to parseDeadline should not be null";
+        if (arguments.isEmpty()) {
+            throw new InvalidCommandException("What is your deadline task?");
+        }
         String[] parts = Parser.parseDeadline(arguments);
         try {
             Task task = new Deadline(parts[0], parts[1]);
             tasks.add(task);
             return ui.getTaskAddedMessage(task, tasks.size());
         } catch (java.time.format.DateTimeParseException e) {
-            throw new InvalidCommandException("Please enter a valid date/time format (yyyy-MM-dd HHmm). Example: 2025-12-29 1800");
+            throw new InvalidCommandException(
+                    "Please enter a valid date & time format (yyyy-MM-dd HHmm). Example: /by 2025-12-29 1800");
         }
     }
 
