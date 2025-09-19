@@ -9,7 +9,8 @@ features of **Siri**.
 
 
 ## Getting started
-Get started by downloading **Siri** (siri.jar) from [here]. 
+Get started by downloading the latest version of siri.jar 
+from [here](https://github.com/timothyleejin/ip/releases/). 
 
 Next, move siri.jar into an empty folder and open the terminal in your desktop. 
 In your terminal, navigate into that folder and type in `java -jar siri.jar`. 
