@@ -2,19 +2,14 @@
 
 Meet **Siri**, your desktop task management chatbot.
 
-![Siri Screenshot](docs/UI.png)
+![Siri Screenshot](UI.png)
 
 Let's walk you through the setup process and the 
 features of **Siri**.
 
 
-## Table of Contents
-1. Setup process
-2. Features
-
-
-## Setup process
-Start by downloading **Siri** (siri.jar) from [here]. 
+## Getting started
+Get started by downloading **Siri** (siri.jar) from [here]. 
 
 Next, move siri.jar into an empty folder and open the terminal in your desktop. 
 Navigate into that folder and type in `java -jar siri.jar`. 
