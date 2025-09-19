@@ -55,5 +55,15 @@ public class MainWindow extends AnchorPane {
                 DialogBox.getSiriDialog(response, siriImage)
         );
         userInput.clear();
+
+        if (siri.isExit()) {
+            javafx.animation.PauseTransition delay =
+                    new javafx.animation.PauseTransition(javafx.util.Duration.seconds(1.5));
+            delay.setOnFinished(event -> {
+                javafx.application.Platform.exit();
+                System.exit(0);
+            });
+            delay.play();
+        }
     }
 }

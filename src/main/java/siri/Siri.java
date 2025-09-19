@@ -105,6 +105,10 @@ public class Siri {
         return ui.getGoodbyeMessage();
     }
 
+    public boolean isExit() {
+        return isExit;
+    }
+
     private String performListAction() {
         return ui.getTaskListMessage(tasks.getAll());
     }
