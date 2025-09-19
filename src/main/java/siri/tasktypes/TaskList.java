@@ -117,8 +117,10 @@ public class TaskList {
     }
 
     /**
-     * Detects scheduling anomalies for Event tasks.
-     * Throws IllegalArgumentException if there is overlap.
+     * Detects scheduling conflicts for {@link Event} tasks.
+     *
+     * @param newTask the new task being added
+     * @throws IllegalArgumentException if the new event overlaps with an existing one
      */
     private void detectScheduleClash(Task newTask) {
         if (!(newTask instanceof Event)) {
@@ -134,14 +136,34 @@ public class TaskList {
         }
     }
 
+    /**
+     * Checks whether a task is an {@link Event}.
+     *
+     * @param task the task to check
+     * @return true if the task is an {@link Event}, false otherwise
+     */
     private boolean isEvent(Task task) {
         return task instanceof Event;
     }
 
+    /**
+     * Determines if two events overlap in time.
+     *
+     * @param a the first event
+     * @param b the second event
+     * @return true if the events overlap, false otherwise
+     */
     private boolean eventsOverlap(Event a, Event b) {
         return !(a.getTo().isBefore(b.getFrom()) || a.getFrom().isAfter(b.getTo()));
     }
 
+    /**
+     * Builds a descriptive error message for a schedule clash between two events.
+     *
+     * @param newEvent the new event being added
+     * @param existing the existing event it clashes with
+     * @return the formatted clash message
+     */
     private String buildClashMessage(Event newEvent, Event existing) {
         return "Mate, schedule clashes! " + newEvent + " overlaps with " + existing;
     }

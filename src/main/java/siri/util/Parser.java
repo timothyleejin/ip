@@ -3,12 +3,39 @@ package siri.util;
 import siri.exceptions.SiriException;
 import siri.exceptions.InvalidCommandException;
 
+/**
+ * Utility class for parsing user commands and extracting structured information.
+ * <p>
+ * This class provides methods to parse general commands, as well as specific
+ * command types like deadlines and events. It ensures commands are valid
+ * and throws {@link SiriException} or {@link InvalidCommandException} on errors.
+ * </p>
+ *
+ * @see SiriException
+ * @see InvalidCommandException
+ */
 public class Parser {
+
+    /**
+     * Parses a raw user command into an array containing the command keyword
+     * and optional arguments.
+     *
+     * @param command the raw input command string
+     * @return a string array where the first element is the command keyword,
+     *         and the second element (if present) is the arguments
+     * @throws SiriException if the command is invalid or empty
+     */
     public static String[] parseCommand(String command) throws SiriException {
         validateCommand(command);
         return splitCommand(command);
     }
 
+    /**
+     * Validates that the command is not null or empty.
+     *
+     * @param command the command string to validate
+     * @throws InvalidCommandException if the command is null or empty
+     */
     private static void validateCommand(String command) throws InvalidCommandException {
         assert command != null : "Command passed to Parser.parse should not be null";
         if (command.trim().isEmpty()) {
@@ -16,6 +43,12 @@ public class Parser {
         }
     }
 
+    /**
+     * Splits the command string into the keyword and the arguments.
+     *
+     * @param command the command string to split
+     * @return a string array containing the command keyword and optional arguments
+     */
     private static String[] splitCommand(String command) {
         return command.trim().split(" ", 2);
     }

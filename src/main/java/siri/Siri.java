@@ -17,6 +17,15 @@ import siri.util.Parser;
 
 import java.io.IOException;
 
+/**
+ * Represents Siri, a personal desktop task assistant.
+ * <p>
+ * Siri can manage tasks such as todos, deadlines, and events.
+ * Users can interact with Siri via both CLI and GUI. It stores tasks
+ * persistently in a file and supports commands like add, delete,
+ * mark/unmark, list, find, and exit.
+ * </p>
+ */
 public class Siri {
     private static final String FILE_PATH = "./data/siri.txt";
     protected TaskList tasks;
@@ -24,6 +33,11 @@ public class Siri {
     private Ui ui;
     private boolean isExit = false;
 
+    /**
+     * Constructs a {@code Siri} instance with the given file path for storage.
+     *
+     * @param filePath The path to the storage file.
+     */
     public Siri(String filePath) {
         ui = new Ui();
         storage = new Storage(filePath);
@@ -65,6 +79,13 @@ public class Siri {
         }
     }
 
+    /**
+     * Executes the given command after parsing.
+     *
+     * @param command The raw command input.
+     * @return Siri's response after executing the command.
+     * @throws SiriException If the command is invalid or cannot be executed.
+     */
     private String executeCommand(String command) throws SiriException {
         assert command != null : "Command should not be null";
         String[] parsedCommand = Parser.parseCommand(command);
@@ -72,6 +93,13 @@ public class Siri {
         return dispatchCommand(parsedCommand);
     }
 
+    /**
+     * Dispatches a parsed command to the appropriate action handler.
+     *
+     * @param parsedCommand The parsed command tokens.
+     * @return Siri's response after executing the action.
+     * @throws SiriException If the command is invalid.
+     */
     private String dispatchCommand(String[] parsedCommand) throws SiriException {
         String argument = parsedCommand[0].toLowerCase();
         String userAction = parsedCommand.length > 1 ? parsedCommand[1] : "";
@@ -100,19 +128,42 @@ public class Siri {
         }
     }
 
+    /**
+     * Handles the exit command and returns the goodbye message.
+     *
+     * @return Siri's goodbye message.
+     */
     private String performExitAction() {
         isExit = true;
         return ui.getGoodbyeMessage();
     }
 
+    /**
+     * Checks if the exit command has been issued.
+     *
+     * @return {@code true} if Siri should exit, otherwise {@code false}.
+     */
     public boolean isExit() {
         return isExit;
     }
 
+    /**
+     * Handles the list command by displaying all tasks.
+     *
+     * @return A formatted list of tasks.
+     */
     private String performListAction() {
         return ui.getTaskListMessage(tasks.getAll());
     }
 
+    /**
+     * Marks or unmarks a task as complete based on the user's input.
+     *
+     * @param description The task number as a string.
+     * @param isMark      {@code true} to mark, {@code false} to unmark.
+     * @return A confirmation message about the task update.
+     * @throws SiriException If the task number is invalid or not found.
+     */
     protected String performMarkAction(String description, boolean isMark) throws SiriException {
         assert description != null : "Task description should not be null";
         assert tasks != null : "TaskList should be initialised";
@@ -138,6 +189,13 @@ public class Siri {
         }
     }
 
+    /**
+     * Adds a new ToDo task.
+     *
+     * @param description The description of the todo task.
+     * @return A confirmation message about the added task.
+     * @throws SiriException If the description is empty.
+     */
     protected String performTodoAction(String description) throws SiriException {
         assert description != null : "Todo description should not be null";
         if (description.isEmpty()) {
@@ -149,6 +207,13 @@ public class Siri {
         return ui.getTaskAddedMessage(task, tasks.size());
     }
 
+    /**
+     * Adds a new Event task.
+     *
+     * @param arguments The event details in the format "description /from datetime /to datetime".
+     * @return A confirmation message about the added event.
+     * @throws SiriException If the arguments are invalid or empty.
+     */
     protected String performEventAction(String arguments) throws SiriException {
         assert arguments != null : "Event arguments passed to parseEvent should not be null";
         if (arguments.isEmpty()) {
@@ -168,6 +233,13 @@ public class Siri {
         }
     }
 
+    /**
+     * Adds a new Deadline task.
+     *
+     * @param arguments The deadline details in the format "description /by datetime".
+     * @return A confirmation message about the added deadline task.
+     * @throws SiriException If the arguments are invalid or empty.
+     */
     protected String performDeadlineAction(String arguments) throws SiriException {
         assert arguments != null : "Deadline arguments passed to parseDeadline should not be null";
         if (arguments.isEmpty()) {
@@ -184,6 +256,13 @@ public class Siri {
         }
     }
 
+    /**
+     * Deletes a task by its number.
+     *
+     * @param arguments The task number to delete.
+     * @return A confirmation message about the deleted task.
+     * @throws SiriException If the task number is invalid or not found.
+     */
     protected String performDeleteAction(String arguments) throws SiriException {
         assert arguments != null : "Delete argument should not be null";
         if (arguments.isEmpty()) {
@@ -220,10 +299,18 @@ public class Siri {
         return ui.getMatchingTasksMessage(matchingTasks, keyword);
     }
 
+    /**
+     * Entry point for running Siri in CLI mode.
+     *
+     * @param args Command-line arguments.
+     */
     public static void main(String[] args) {
         new Siri(FILE_PATH).run();
     }
 
+    /**
+     * Runs the CLI loop for Siri, continuously processing user input until exit.
+     */
     private void run() {
         ui.sayWelcome();
         Scanner scanner = new Scanner(System.in);

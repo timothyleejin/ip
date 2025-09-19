@@ -12,7 +12,7 @@ features of **Siri**.
 Get started by downloading **Siri** (siri.jar) from [here]. 
 
 Next, move siri.jar into an empty folder and open the terminal in your desktop. 
-Navigate into that folder and type in `java -jar siri.jar`. 
+In your terminal, navigate into that folder and type in `java -jar siri.jar`. 
 
 Just like that, **Siri** will appear and say hi to you!
 

@@ -9,12 +9,27 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 /**
- * A GUI for Siri using FXML.
+ * The entry point of the JavaFX application.
+ * <p>
+ * {@code Main} initializes the JavaFX GUI for the Siri chatbot by
+ * loading the FXML layout, setting up the primary stage (window),
+ * and injecting the {@link Siri} instance into the {@link MainWindow} controller.
+ * </p>
  */
 public class Main extends Application {
 
     private Siri siri = new Siri();
 
+    /**
+     * Called when the JavaFX application is started.
+     * <p>
+     * This method loads the {@code MainWindow.fxml} layout, creates the scene,
+     * sets the stage title, and injects the {@link Siri} instance into
+     * the {@link MainWindow} controller before displaying the stage.
+     * </p>
+     *
+     * @param stage the primary stage provided by the JavaFX runtime
+     */
     @Override
     public void start(Stage stage) {
         try {
