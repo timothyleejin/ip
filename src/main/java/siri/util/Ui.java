@@ -27,7 +27,7 @@ public class Ui {
 
     public String getTaskMarkedMessage(Task task, boolean isMarked) {
         assert task != null : "Task should not be null when marking";
-        return "Nice! I've marked this task as " + (isMarked ? "done:\n" : "not done yet:\n") + task;
+        return "Okay. I've marked this task as " + (isMarked ? "done:\n" : "not done yet:\n") + task;
     }
 
     public String getTaskAddedMessage(Task task, int totalTasks) {
