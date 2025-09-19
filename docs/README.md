@@ -14,7 +14,7 @@ Get started by downloading the latest version of siri.jar
 from [here](https://github.com/timothyleejin/ip/releases/). 
 
 Next, move siri.jar into an empty folder and open the terminal in your desktop. 
-In your terminal, navigate into the folder with siri.jar 
+In your terminal, navigate into the folder with `siri.jar` 
 and type in `java -jar siri.jar`. 
 
 Just like that, **Siri** will appear and say hi to you!
