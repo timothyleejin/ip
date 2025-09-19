@@ -18,7 +18,7 @@ public class Parser {
 
     /**
      * Parses a raw user command into an array containing the command keyword
-     * and optional arguments.
+     * and arguments.
      *
      * @param command the raw input command string
      * @return a string array where the first element is the command keyword,
@@ -76,7 +76,7 @@ public class Parser {
      */
     public static String[] parseDeadline(String arguments) throws SiriException {
         String[] parts = arguments.split("/by", 2);
-        if (parts.length < 2) {
+        if (parts.length < 2 || parts[1].isEmpty()) {
             throw new InvalidCommandException(
                     "Please specify the deadline using /by. Example: deadline return book /by 2025-12-29 1800"
             );

@@ -1,8 +1,9 @@
 # Siri User Guide
 
-Meet **Siri**, your desktop task management chatbot.
+Meet **Siri**, your desktop task management chatbot designed to help you 
+to plan your tasks efficiently and effectively.
 
-![Siri Screenshot](UI.png)
+![Siri Screenshot](Ui.png)
 
 Let's walk you through the setup process and the 
 features of **Siri**.
@@ -13,13 +14,14 @@ Get started by downloading the latest version of siri.jar
 from [here](https://github.com/timothyleejin/ip/releases/). 
 
 Next, move siri.jar into an empty folder and open the terminal in your desktop. 
-In your terminal, navigate into that folder and type in `java -jar siri.jar`. 
+In your terminal, navigate into the folder with siri.jar 
+and type in `java -jar siri.jar`. 
 
 Just like that, **Siri** will appear and say hi to you!
 
 
 ## Features
-### Adding To Do tasks
+### Add To Do tasks
 
 Add tasks that have no time constraints to your task list.
 
@@ -38,7 +40,7 @@ Now you have 1 task(s) in the list.
 ```
 [T] represents a todo task.
 
-### Adding Deadline tasks
+### Add Deadline tasks
 
 Add tasks that have deadlines to your task list.
 
@@ -58,7 +60,7 @@ Now you have 2 task(s) in the list.
 ```
 [D] represents a deadline task.
 
-### Adding Event tasks
+### Add Event tasks
 
 Add tasks that happen within a specific time period to your task list.
 
@@ -79,9 +81,10 @@ Now you have 3 task(s) in the list.
 ```
 [E] represents an event task.
 
-**Siri** will not allow you to add 2 events that have clashing time periods.
+**Siri** automatically detects scheduling anomalies and will not allow you 
+to add events that have clashing time periods.
 
-### View task list
+### View your tasks
 Display all the tasks in your task list.
 
 **Format:** `list`
@@ -99,7 +102,7 @@ Here are the tasks in your list:
 3.[E][ ] networking session (from: Dec 29 2026 6:00pm to: Dec 29 2026 7:00pm)
 ```
 
-### Marking a task done
+### Mark a task as complete
 
 Mark a task in your task list as done.
 
@@ -118,9 +121,9 @@ Nice! I have marked this task as done:
 
 [X] represents a completed task.
 
-### Marking a task undone
+### Mark a task as incomplete
 
-Unmark a task that was previously done.
+Unmark a task that was previously marked as done.
 
 **Format:** `unmark <task number>`
 
@@ -138,7 +141,7 @@ Okay. I have marked this task as not done yet:
 
 ### Find a task
 
-Search for a task by typing in a keyword.
+Search for a task in your task list by typing in a keyword.
 
 **Format:** `find <keyword>`
 

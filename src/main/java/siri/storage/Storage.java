@@ -72,13 +72,12 @@ public class Storage {
 
     /**
      * Saves the current list of tasks to the storage file.
-     * Each task is converted to a different representation using {@link Task#toFileString()}.
+     * Each task is converted to a different representation.
      * It is then written to the file, with each task on a separate line.
      *
      * @param tasks the list of Task objects to be persisted to disk.
      * @throws IOException if an I/O error occurs during file writing,
      *         such as disk or storage issues.
-     * @see Task#toFileString()
      */
     public void save(List<Task> tasks) throws IOException {
         assert tasks != null : "Task list passed to save() should not be null";

@@ -173,7 +173,9 @@ public class Siri {
         }
         try {
             int index = Integer.parseInt(description) - 1;
-            assert index >= 0 : "Task index should be non-negative";
+            if (index < 0 || index >= tasks.size()) {
+                throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
+            }
             Task task = tasks.get(index);
             assert task != null : "Task at index should exist";
             if (isMark) {
@@ -182,8 +184,6 @@ public class Siri {
                 task.markUndone();
             }
             return ui.getTaskMarkedMessage(task, isMark);
-        } catch (IndexOutOfBoundsException e) {
-            throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
         } catch (NumberFormatException e) {
             throw new InvalidCommandException("Sorry, please key in a valid task number!");
         }
@@ -271,12 +271,12 @@ public class Siri {
 
         try {
             int index = Integer.parseInt(arguments) - 1;
-            assert index >= 0 : "Task index should be non-negative";
+            if (index < 0 || index >= tasks.size()) {
+                throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
+            }
             Task removedTask = tasks.remove(index);
             assert removedTask != null : "Removed task should exist";
             return ui.getTaskDeletedMessage(removedTask, tasks.size());
-        } catch (IndexOutOfBoundsException e) {
-            throw new TaskNotFoundException("Oops!! The task number provided does not exist :(");
         } catch (NumberFormatException e) {
             throw new InvalidCommandException("Sorry, please key in a valid task number!");
         }

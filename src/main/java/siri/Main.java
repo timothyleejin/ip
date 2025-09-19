@@ -37,7 +37,7 @@ public class Main extends Application {
             AnchorPane ap = fxmlLoader.load();
             Scene scene = new Scene(ap);
             stage.setScene(scene);
-            stage.setTitle("Siri chatbot :)");
+            stage.setTitle("Siri");
             fxmlLoader.<MainWindow>getController().setSiri(siri);  // inject the Siri instance
             stage.show();
         } catch (IOException e) {
